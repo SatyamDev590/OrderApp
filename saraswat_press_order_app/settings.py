@@ -80,7 +80,7 @@ WSGI_APPLICATION = 'saraswat_press_order_app.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('ORDER_POSTGRES_DB', 'order_db'),
+        'NAME': os.environ.get('ORDER_POSTGRES_DB', 'postgres'),
         'USER': os.environ.get('ORDER_POSTGRES_USER', 'usr_order_app'),
         'PASSWORD': os.environ.get('ORDER_POSTGRES_PASSWORD', 'abc123!@#'),
         'HOST': os.environ.get('ORDER_POSTGRES_IP', 'localhost'),
