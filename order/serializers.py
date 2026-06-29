@@ -51,19 +51,21 @@ class OrderCreateSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         jobs_data = validated_data.pop('jobs')
-        customer = validated_data.pop('customer_id', None)
-        print(customer, validated_data.get('customer_mobile'),
-              validated_data.get('customer_name'))
 
-        if customer is None:
-            customer, _ = Customer.objects.get_or_create(
-                mobile_number=validated_data.pop('customer_mobile'),
-                defaults={'name': validated_data.pop('customer_name')},
+        # Pop customer fields up-front so they never leak into Order(**validated_data)
+        customer_obj  = validated_data.pop('customer_id', None)
+        customer_name = validated_data.pop('customer_name', None)
+        customer_mobile = validated_data.pop('customer_mobile', None)
+
+        if customer_obj is None:
+            # New customer path – name + mobile are required (enforced by validate())
+            print(f"Creating new customer: {customer_name} ({customer_mobile})")
+            customer_obj, _ = Customer.objects.update_or_create(
+                name=customer_name,
+                defaults={'mobile_number': customer_mobile},
             )
-        else:
-            validated_data.pop('customer_name', None)
-            validated_data.pop('customer_mobile', None)
-        order = Order(customer=customer, **validated_data)
+
+        order = Order(customer=customer_obj, **validated_data)
         order.save()
         for job_data in jobs_data:
             Job(order=order, **job_data).save()

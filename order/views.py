@@ -1,11 +1,12 @@
-from django.shortcuts import render
-from rest_framework import generics, status
+from django.shortcuts import get_object_or_404, render
+from rest_framework import generics, mixins, status
 from rest_framework.response import Response
 
 from .models import Assignee, Customer, Job, JobStatus, Order
 from .serializers import (
     AssigneeSerializer,
     CustomerSerializer,
+    JobCreateSerializer,
     JobDetailSerializer,
     JobStatusSerializer,
     JobUpdateSerializer,
@@ -62,8 +63,9 @@ class OrderDetailUpdateView(generics.RetrieveUpdateAPIView):
         serializer.is_valid(raise_exception=True)
         order = serializer.save()
         return Response(OrderDetailSerializer(order).data)
-class JobUpdateView(generics.UpdateAPIView):
-    """PATCH /api/jobs/<job_id>/  → update job fields"""
+class JobUpdateView(mixins.DestroyModelMixin, generics.UpdateAPIView):
+    """PATCH  /api/jobs/<job_id>/  → update job fields
+       DELETE /api/jobs/<job_id>/  → delete a job"""
     queryset = Job.objects.select_related('status', 'assignee')
     lookup_field = 'job_id'
     serializer_class = JobUpdateSerializer
@@ -76,6 +78,22 @@ class JobUpdateView(generics.UpdateAPIView):
         job = serializer.save()
         return Response(JobDetailSerializer(job).data)
 
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+
+
+class JobCreateView(generics.CreateAPIView):
+    """POST /api/orders/<order_id>/jobs/  → add a new job to an existing order"""
+    serializer_class = JobCreateSerializer
+
+    def create(self, request, *args, **kwargs):
+        order = get_object_or_404(Order, order_id=self.kwargs['order_id'])
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        job = Job(order=order, **serializer.validated_data)
+        job.save()
+        return Response(JobDetailSerializer(job).data, status=status.HTTP_201_CREATED)
+
 
 class AssigneeListView(generics.ListAPIView):
     queryset = Assignee.objects.all().order_by('name')
@@ -85,6 +103,13 @@ class AssigneeListView(generics.ListAPIView):
 class CustomerListView(generics.ListAPIView):
     queryset = Customer.objects.all().order_by('name')
     serializer_class = CustomerSerializer
+
+
+class CustomerUpdateView(generics.UpdateAPIView):
+    """PATCH /api/customers/<id>/ → update customer name / mobile"""
+    queryset = Customer.objects.all()
+    serializer_class = CustomerSerializer
+    http_method_names = ['patch', 'put', 'head', 'options']
 
 
 class JobStatusListView(generics.ListAPIView):
