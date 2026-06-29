@@ -1,0 +1,75 @@
+/* ── Order rows: clear visual separation ─────────────────────────────────── */
+
+/* Remove default Ant Design row borders so we can style them ourselves */
+.orders-table .ant-table-tbody > tr.order-row > td {
+  border-bottom: none !important;
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
+  background: #ffffff;
+  transition: background 0.15s;
+}
+
+/* Thin divider line between each order */
+.orders-table .ant-table-tbody > tr.order-row:not(:last-child) > td {
+  box-shadow: inset 0 -1px 0 #f0f0f0;
+}
+
+/* Hover: lift the row with a subtle shadow */
+.orders-table .ant-table-tbody > tr.order-row:hover > td {
+  background: #f6f8ff !important;
+}
+
+/* ── Expanded row container ──────────────────────────────────────────────── */
+
+/* Kill the default expanded-row cell padding / background */
+.orders-table .ant-table-tbody > tr.ant-table-expanded-row > td {
+  padding: 0 0 12px 0 !important;
+  background: transparent !important;
+  border-bottom: none !important;
+}
+
+/* The card wrapper we render inside expandedRowRender */
+.order-jobs-card {
+  margin: 0 16px 0 52px;
+  background: #f8faff;
+  border: 1px solid #d6e4ff;
+  border-radius: 10px;
+  box-shadow: 0 3px 12px rgba(26, 26, 200, 0.07);
+  overflow: hidden;
+}
+
+.order-jobs-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  background: linear-gradient(90deg, #e8f0fe 0%, #f0f5ff 100%);
+  border-bottom: 1px solid #d6e4ff;
+}
+
+/* Inner jobs table */
+.order-jobs-card .ant-table {
+  background: transparent !important;
+}
+
+.order-jobs-card .ant-table-thead > tr > th {
+  background: #eef3ff !important;
+  font-size: 12px;
+  color: #555;
+  padding: 7px 12px !important;
+  border-bottom: 1px solid #d6e4ff !important;
+}
+
+.order-jobs-card .ant-table-tbody > tr > td {
+  padding: 7px 12px !important;
+  background: transparent !important;
+  border-bottom: 1px solid #eef3ff !important;
+}
+
+.order-jobs-card .ant-table-tbody > tr:last-child > td {
+  border-bottom: none !important;
+}
+
+.order-jobs-card .ant-table-tbody > tr:hover > td {
+  background: #eef3ff !important;
+}

@@ -1,0 +1,75 @@
+version: '3.7'
+
+services:
+
+  saraswat_press_order_app:
+    stdin_open: true
+    tty: true
+    restart: always
+    image: docker.io/satyam954/order_app:latest
+    container_name: saraswat_press_order_app
+    env_file:
+      - .env
+    working_dir: /home/saraswat_press_order_app/order/
+    entrypoint:
+        - /bin/bash
+        - -c
+        - |
+            python3 manage.py runserver --insecure 0.0.0.0:8005 #Insecure helps us serve static with Debug = False, since this is the dev container, this is intentional.
+    ports:
+        - "8005:8005"
+    networks:
+        saraswat-press-docker:
+            ipv4_address: ${ORDER_APP_IP}
+    volumes:
+        - .:/home/saraswat_press_order_app/order/
+    depends_on:
+        - "postgres_order_app"
+        - "react"
+
+  postgres_order_app:
+    stdin_open: true
+    tty: true
+    restart: always
+    image: docker.io/satyam954/postgres:17.0
+    container_name: postgres_order_app
+    env_file:
+      - .env
+    ports:
+        - "5442:5432"
+    volumes:
+        - postgres-order-app-volume:/var/lib/postgresql/data/pgdata
+    networks:
+        saraswat-press-docker:
+            ipv4_address: ${ORDER_POSTGRES_IP}
+    healthcheck:
+      test: "pg_isready -h localhost -p 5432 -q -U ${ORDER_POSTGRES_USER} -d ${ORDER_POSTGRES_DB}"
+      interval: 10s
+      timeout: 10s
+      retries: 5
+  react:
+    image: docker.io/satyam954/order_app_react:latest
+    container_name: react-frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    networks:
+        saraswat-press-docker:
+            ipv4_address: ${ORDER_REACT_IP}
+    working_dir: /app/frontend
+
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+
+    stdin_open: true
+    tty: true
+
+networks:
+    saraswat-press-docker:
+        external: true
+
+volumes:
+    postgres-order-app-volume:
+        external: true

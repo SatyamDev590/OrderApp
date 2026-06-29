@@ -1,0 +1,6 @@
+node_modules
+venv/lib/python3.9/*
+venv/*
+venv
+db.sqlite3
+.env
